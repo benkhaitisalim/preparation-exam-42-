@@ -1,7 +1,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <string.h>
+
 int match_space(FILE *f)
 {
     int space = fgetc(f);
@@ -10,47 +10,49 @@ int match_space(FILE *f)
         space = fgetc(f);
     }
     if(space == EOF)
-        return -1;
+    {
+        return 0;
+    }
     ungetc(space,f);
     return (1);
 }
 
 int match_char(FILE *f, char c)
 {
-    char ch = fgetc(f);
+    int ch = fgetc(f);
     if(ch == c)
     {
-        return 1;
+        return 0;
     }
-    return (-1);
+    return (1);
 }
 
 int scan_char(FILE *f, va_list ap)
 {
-    char *capture = va_arg(ap,char *);
+    char *stor_char = va_arg(ap,char *);
     char c = fgetc(f);
-    *capture = c;
+    if(c == EOF)
+    {
+        return 0;
+    }
+    *stor_char = c;
     return (1);
 }
 
 int scan_int(FILE *f, va_list ap)
 {
-    int num = fgetc(f);
     int sign = 1;
-    while(num != EOF && isspace(num))
-    {
-        num = fgetc(f);
-    }
+    int num = fgetc(f);
+    int scaned_char = 0;
     if(num == '+' || num == '-')
     {
         if(num == '-')
-        {
             sign *= -1;
-        }
         num = fgetc(f);
     }
     if(!isdigit(num))
     {
+        ungetc(num,f);
         return -1;
     }
     int result = 0;
@@ -58,25 +60,31 @@ int scan_int(FILE *f, va_list ap)
     {
         result = (result * 10) + (num - '0');
         num = fgetc(f);
+        scaned_char++;
     }
-    int *store_result = va_arg(ap, int *);
-    *store_result = result * sign;
-    return (1);
+    int *tab = va_arg(ap , int *);
+    *tab = (result * sign);
+    return (scaned_char);
 }
 
 int scan_string(FILE *f, va_list ap)
 {
-    char *store_string = va_arg(ap, char *);
-    int char_scaned = 0;
     char c = fgetc(f);
+    int scaned_char = 0;
+    char *stor_string = va_arg(ap, char *);
+    int index = 0;
     while(c != EOF && !isspace(c))
     {
-        store_string[char_scaned] = c;
-        char_scaned++;
-        c = fgetc(f); 
+        stor_string[index] = c;
+        index++;
+        scaned_char++;
+        c = fgetc(f);
     }
-    store_string[char_scaned] = '\0';
-    return (char_scaned);
+    if(scaned_char == 0 || index ==0)
+    {
+        return 0;
+    }
+    return (1);
 }
 
 
@@ -141,4 +149,15 @@ int ft_scanf(const char *format, ...)
     va_end(ap);
     return ret;
 }
-
+int main()
+{
+    char num[20];
+    ft_scanf("%s",num);
+    printf("%s\n",num);
+    int n;
+    ft_scanf("%d",&n);
+    printf("%d\n",n);
+    char c;
+    ft_scanf("%c",&c);
+    printf("%c\n",c);
+}

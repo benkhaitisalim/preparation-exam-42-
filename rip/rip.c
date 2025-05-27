@@ -1,13 +1,10 @@
 #include <unistd.h>
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 
-void ft_check_left_right(char *input, int *left,int *right)
+void    count_brackets(char *input,int *left,int *right)
 {
     int i = 0;
-    *left = 0;
-    *right = 0;
     while(input[i])
     {
         if(input[i] == '(')
@@ -20,78 +17,76 @@ void ft_check_left_right(char *input, int *left,int *right)
             {
                 (*left)--;
             }
-            else
-            {   
+            else 
                 (*right)++;
-            }
         }
         i++;
     }
 }
-int ft_check_result(char *input)
+int si_correct(char *p)
 {
     int i = 0;
-    int left = 0;
-    while(input[i])
+    int balance = 0;
+    while(p[i])
     {
-        if(input[i] == '(')
+        if(p[i] == '(')
         {
-            left++;
+            balance++;
         }
-        else if(input[i] == ')')
+        else if(p[i] == ')')
         {
-            left--;
-            if(left < 0)
+            balance--;
+            if(balance < 0)
+            {
                 return 1;
+            }
         }
         i++;
     }
     return 0;
 }
-
-void permetation(char *input,int index_input,int left,int right,char *tmp,int tmp_pos)
+void solve_brackets_problem(char *str,int index_str,int left,int right,char *input_tem,int index_tem)
 {
-    if(!input[index_input])
+    if(!str[index_str])
     {
         if(left == 0 && right == 0)
         {
-            if(ft_check_result(tmp) == 0)
+            input_tem[index_tem] = '\0';
+            if(si_correct(input_tem) != 1)
             {
-                tmp[tmp_pos] = '\0';
-                write(1,tmp,strlen(tmp));
+                write(1,input_tem,strlen(input_tem));
                 write(1," \n",2);
             }
         }
         return ;
     }
-    if(input[index_input] == '(' && left > 0 || input[index_input] == ')' && right > 0)
+    if((str[index_str] == '('  && left > 0) || (str[index_str] == ')' && right > 0))
     {
-        tmp[tmp_pos] = ' ';
-        
-        if(input[index_input] == '('  && left > 0)
+        input_tem[index_tem] = ' ';
+        if(str[index_str] == '(')
         {
-            permetation(input,index_input + 1, left - 1, right,tmp,tmp_pos + 1);
+            solve_brackets_problem(str,index_str + 1,left - 1,right,input_tem,index_tem + 1);
         }
-        if(input[index_input] == ')'  && right > 0)
+        else if(str[index_str] == ')')
         {
-            permetation(input,index_input + 1, left, right - 1,tmp,tmp_pos + 1);
+            solve_brackets_problem(str,index_str + 1,left,right - 1,input_tem,index_tem + 1);
         }
+
     }
-    tmp[tmp_pos] = input[index_input];
-    permetation(input,index_input + 1, left, right ,tmp,tmp_pos + 1);
+    input_tem[index_tem] = str[index_str];
+    solve_brackets_problem(str,index_str + 1,left,right ,input_tem,index_tem + 1);
+
 }
-int main(int ac , char **av)
+
+int main(int ac ,char **av)
 {
     if(ac != 2)
     {
         return 1;
     }
-    char *input = strdup(av[1]);
-    int len_input = strlen(input);
-    char *tmp = malloc(sizeof(char ) * len_input);
     int left,right;
-    ft_check_left_right(input,&left,&right);
-    permetation(input,0, left, right,tmp,0);
-    return 0;
-    
+    count_brackets(av[1],&left,&right);
+    char input_tem[strlen(av[1]) + 1];
+    solve_brackets_problem(av[1],0,left,right,input_tem,0);
+    return 1;
 }

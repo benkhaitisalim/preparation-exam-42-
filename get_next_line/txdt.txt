@@ -1,6 +1,0 @@
-
-- It will manage only the following conversions: s, d, and c
-- You don't have to handle the options *, m and '
-- You don't have to handle the maximum field width
-- You don't have to handle the types modifier characters (h, hh, l, etc.)
-- You don't have to handle the conversions beginning wit

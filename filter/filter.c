@@ -1,68 +1,86 @@
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <fcntl.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #define BUFFER_SIZE 42
+#include <string.h>
 char *ft_strdup(char *old)
 {
-    char *new_copy = malloc(sizeof(char * ) * (strlen(old) + 1));
+    char *new = malloc(sizeof(char ) * (strlen(old) + 1));
     int i = 0;
     while(i < strlen(old))
     {
-        new_copy[i] = old[i];
+        new[i] = old[i];
         i++;
     }
-    new_copy[i] = '\0';
-    return new_copy;
+    new[i] = '\0';
+    return new;
 }
-int main(int ac ,char **av)
+int ft_strncmp(char *a, char *b, int len)
+{
+    int i = 0;
+    while(i < len)
+    {
+        if(a[i] != b[i])
+        {
+            return (unsigned char)a[i] - (unsigned char)b[i];
+        }
+        i++;
+    }
+    return 0;
+}
+int main(int ac, char **av)
 {
     if(ac != 2)
-        return 1;
-    char *word = ft_strdup(av[1]);
-    if(!word)
     {
+        perror("arg not ok\n");
         return 1;
     }
-    int len_word = strlen(word);
+    char *word_hiden = ft_strdup(av[1]);
+    int len_word = strlen(word_hiden);
     if(len_word == 0)
     {
-        perror("bla taneez rah input khawi \n");
+        free(word_hiden);
+        return 0;
+    }
+    char buffer[BUFFER_SIZE];
+    char *input_echo = malloc(sizeof(char ) * (BUFFER_SIZE + 1));
+    if(!input_echo)
+    {
+        free(word_hiden);
         return 1;
     }
-    int len_total = 0;
     int byte;
-    char *input = malloc(sizeof(char) * BUFFER_SIZE);
-    char buffer[BUFFER_SIZE];
-    while((byte = read(0,buffer,BUFFER_SIZE)) > 0)
+    int len_total;
+    len_total = 0;
+    while((byte = read(STDIN_FILENO,buffer,BUFFER_SIZE)) > 0)
     {
-        char *temporary = realloc(input, len_total + byte + 1);
-        if(!temporary)
+        char *tmp = realloc(input_echo,len_total + byte + 1);
+        if(!tmp || byte <= 0)
         {
-            perror("error : ");
-            return 1;
+            perror("allocation fail \n");
+            return 1; 
         }
-        temporary = input;
-        memmove(input + len_total, buffer, byte);
+        input_echo = tmp;
+        memmove(input_echo,buffer, byte);
         len_total += byte;
-        input[len_total] = '\0';
+        input_echo[len_total] = '\0';
     }
-    char *pointer_to_input = input;
-    while(*pointer_to_input)
+    fprintf(stdout,"%s",input_echo);
+    char *pointer = input_echo;
+    while(*pointer)
     {
-        if(strncmp(pointer_to_input,word,len_word) == 0)
+        if(ft_strncmp(pointer,word_hiden,len_word) == 0)
         {
             int j = 0;
             while(j < len_word)
             {
-                pointer_to_input[j] = '*';
+                pointer[j] = '*';
                 j++;
             }
         }
-        pointer_to_input++;
+        pointer++;
     }
-    fprintf(stdout,"%s",input);
-    free(input);
+    fprintf(stdout,"%s",input_echo);
+    free(input_echo);
     return 0;
 }
