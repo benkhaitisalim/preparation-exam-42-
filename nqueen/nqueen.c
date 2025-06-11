@@ -6,7 +6,7 @@
 
 
 
-int is_safe(int tab[],int nqueen,int col,int row)
+int is_safe(int tab[],int col,int row)
 {
     int i = 0;
     while(i < row)

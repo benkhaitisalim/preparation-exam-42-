@@ -61,7 +61,7 @@ int main(int ac, char **av)
             return 1; 
         }
         input_echo = tmp;
-        memmove(input_echo,buffer, byte);
+        memmove(input_echo + len_total,buffer, byte);
         len_total += byte;
         input_echo[len_total] = '\0';
     }
